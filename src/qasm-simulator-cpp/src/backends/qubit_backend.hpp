@@ -49,33 +49,33 @@ protected:
    * Measurement and Reset
    ************************/
 
-  void qc_reset(const uint_t qubit, const uint_t state = 0) override;
-  void qc_measure(const uint_t qubit, const uint_t bit) override;
+  void qc_reset(const std::uint64_t qubit, const std::uint64_t state = 0) override;
+  void qc_measure(const std::uint64_t qubit, const std::uint64_t bit) override;
 
   /************************
    * 1-Qubit Gates
    ************************/
 
   // Single-qubit gates
-  void qc_gate(const uint_t qubit, const double theta, const double phi,
+  void qc_gate(const std::uint64_t qubit, const double theta, const double phi,
                        const double lambda) override;
-  void qc_idle(const uint_t qubit);
-  void qc_gate_x(const uint_t qubit) override;
-  void qc_gate_y(const uint_t qubit) override;
+  void qc_idle(const std::uint64_t qubit);
+  void qc_gate_x(const std::uint64_t qubit) override;
+  void qc_gate_y(const std::uint64_t qubit) override;
 
-  void qc_u0(const uint_t qubit, const double n);
-  void qc_u1(const uint_t qubit, const double lambda);
-  void qc_u2(const uint_t qubit, const double phi, const double lambda);
-  void qc_u3(const uint_t qubit, const double theta, const double phi,
+  void qc_u0(const std::uint64_t qubit, const double n);
+  void qc_u1(const std::uint64_t qubit, const double lambda);
+  void qc_u2(const std::uint64_t qubit, const double phi, const double lambda);
+  void qc_u3(const std::uint64_t qubit, const double theta, const double phi,
              const double lambda);
 
   // 2-qubit gates
-  void qc_cnot(const uint_t qctrl, const uint_t qtrgt) override;
-  void qc_cz(const uint_t q0, const uint_t q1) override;
+  void qc_cnot(const std::uint64_t qctrl, const std::uint64_t qtrgt) override;
+  void qc_cz(const std::uint64_t q0, const std::uint64_t q1) override;
 
   // Gates with relaxation
-  void qc_relax(const uint_t qubit, const double time);
-  void qc_matrix1_noise(const uint_t qubit, const cmatrix_t &U,
+  void qc_relax(const std::uint64_t qubit, const double time);
+  void qc_matrix1_noise(const std::uint64_t qubit, const cmatrix_t &U,
                         const GateError &err);
 
   /************************
@@ -83,8 +83,8 @@ protected:
    ************************/
 
   cmatrix_t pauli[4], pauli2[16];
-  void add_pauli(const uint_t p, cmatrix_t &U);
-  void add_pauli2(const uint_t p, cmatrix_t &U);
+  void add_pauli(const std::uint64_t p, cmatrix_t &U);
+  void add_pauli2(const std::uint64_t p, cmatrix_t &U);
 
   virtual cmatrix_t rz_matrix(const double lambda);
   cmatrix_t noise_matrix1(const cmatrix_t &U, const GateError &err);
@@ -232,8 +232,8 @@ QubitBackend::QubitBackend() : IdealBackend() {
   pauli[2] = y;
   pauli[3] = z;
   // set 2-qubit pauli matrices
-  for (uint_t i = 0; i < 4; i++)
-    for (uint_t j = 0; j < 4; j++)
+  for (std::uint64_t i = 0; i < 4; i++)
+    for (std::uint64_t j = 0; j < 4; j++)
       pauli2[i * 4 + j] = MOs::TensorProduct(pauli[i], pauli[j]);
 
   const complex_t I(0., 1.);
@@ -261,7 +261,7 @@ QubitBackend::QubitBackend() : IdealBackend() {
 // Measurement
 //------------------------------------------------------------------------------
 
-void QubitBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
+void QubitBackend::qc_measure(const std::uint64_t qubit, const std::uint64_t cbit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG QubitBackend::qc_measure(" << qubit << "," << cbit << ")";
@@ -275,7 +275,7 @@ void QubitBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
   }
 
   // Compute measurement outcome
-  const std::pair<uint_t, double> meas = qc_measure_outcome(qubit);
+  const std::pair<std::uint64_t, double> meas = qc_measure_outcome(qubit);
   // Update register with noisy outcome
   creg[cbit] = (noise_flag && noise.readout.ideal == false)
                    ? measure_error(meas.first)
@@ -292,7 +292,7 @@ void QubitBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
 // Reset
 //------------------------------------------------------------------------------
 
-void QubitBackend::qc_reset(const uint_t qubit, const uint_t state) {
+void QubitBackend::qc_reset(const std::uint64_t qubit, const std::uint64_t state) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG QubitBackend::reset(" << qubit << ", " << state << ")";
@@ -312,7 +312,7 @@ void QubitBackend::qc_reset(const uint_t qubit, const uint_t state) {
 // 1-Qubit Gates
 //------------------------------------------------------------------------------
 
-void QubitBackend::qc_gate(const uint_t qubit, const double theta,
+void QubitBackend::qc_gate(const std::uint64_t qubit, const double theta,
                            const double phi, const double lambda) {
 #ifdef DEBUG
   std::stringstream ss;
@@ -334,7 +334,7 @@ void QubitBackend::qc_gate(const uint_t qubit, const double theta,
     IdealBackend::qc_gate(qubit, theta, phi, lambda);
 }
 
-void QubitBackend::qc_u0(const uint_t qubit, const double n) {
+void QubitBackend::qc_u0(const std::uint64_t qubit, const double n) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG QubitBackend::qc_u0(" << qubit << "," << n << ")";
@@ -350,7 +350,7 @@ void QubitBackend::qc_u0(const uint_t qubit, const double n) {
   }
 }
 
-void QubitBackend::qc_u1(const uint_t qubit, const double lambda) {
+void QubitBackend::qc_u1(const std::uint64_t qubit, const double lambda) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG QubitBackend::qc_u1(" << qubit << ",{" << lambda << "})";
@@ -365,7 +365,7 @@ void QubitBackend::qc_u1(const uint_t qubit, const double lambda) {
     IdealBackend::qc_zrot(qubit, lambda);
 }
 
-void QubitBackend::qc_u2(const uint_t qubit, const double phi,
+void QubitBackend::qc_u2(const std::uint64_t qubit, const double phi,
                          const double lambda) {
 #ifdef DEBUG
   std::stringstream ss;
@@ -393,7 +393,7 @@ void QubitBackend::qc_u2(const uint_t qubit, const double phi,
   }
 }
 
-void QubitBackend::qc_u3(const uint_t qubit, const double theta,
+void QubitBackend::qc_u3(const std::uint64_t qubit, const double theta,
                          const double phi, const double lambda) {
 #ifdef DEBUG
   std::stringstream ss;
@@ -418,7 +418,7 @@ void QubitBackend::qc_u3(const uint_t qubit, const double theta,
   }
 }
 
-void QubitBackend::qc_gate_x(const uint_t qubit) {
+void QubitBackend::qc_gate_x(const std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG QubitBackend::qc_gate_y(" << qubit << ")";
@@ -438,7 +438,7 @@ void QubitBackend::qc_gate_x(const uint_t qubit) {
   }
 }
 
-void QubitBackend::qc_gate_y(const uint_t qubit) {
+void QubitBackend::qc_gate_y(const std::uint64_t qubit) {
 // Optimized pauli Y gate
 #ifdef DEBUG
   std::stringstream ss;
@@ -459,7 +459,7 @@ void QubitBackend::qc_gate_y(const uint_t qubit) {
   }
 }
 
-void QubitBackend::qc_idle(const uint_t qubit) {
+void QubitBackend::qc_idle(const std::uint64_t qubit) {
   // Use "id" gate error
   if (noise_flag && gate_error("id").ideal == false) {
 #ifdef DEBUG
@@ -475,7 +475,7 @@ void QubitBackend::qc_idle(const uint_t qubit) {
 // 2-Qubit Gates
 //------------------------------------------------------------------------------
 
-void QubitBackend::qc_cnot(const uint_t qubit_ctrl, const uint_t qubit_targ) {
+void QubitBackend::qc_cnot(const std::uint64_t qubit_ctrl, const std::uint64_t qubit_targ) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG QubitBackend::qc_cnot(" << qubit_ctrl << ", " << qubit_targ
@@ -499,7 +499,7 @@ void QubitBackend::qc_cnot(const uint_t qubit_ctrl, const uint_t qubit_targ) {
     IdealBackend::qc_cnot(qubit_ctrl, qubit_targ);
 }
 
-void QubitBackend::qc_cz(const uint_t qubit_ctrl, const uint_t qubit_targ) {
+void QubitBackend::qc_cz(const std::uint64_t qubit_ctrl, const std::uint64_t qubit_targ) {
 // optimized ideal CZ gate on two qubits
 #ifdef DEBUG
   std::stringstream ss;
@@ -539,12 +539,12 @@ cmatrix_t QubitBackend::rz_matrix(const double lambda) {
 //------------------------------------------------------------------------------
 
 // multiply a unitary by a pauli matrix, doing nothing if j=0
-void QubitBackend::add_pauli(const uint_t j, cmatrix_t &U) {
+void QubitBackend::add_pauli(const std::uint64_t j, cmatrix_t &U) {
   if (j != 0 && j < 4)
     U = pauli[j] * U;
 }
 
-void QubitBackend::add_pauli2(const uint_t j, cmatrix_t &U) {
+void QubitBackend::add_pauli2(const std::uint64_t j, cmatrix_t &U) {
   if (j != 0 && j < 16)
     U = pauli2[j] * U;
 }
@@ -575,7 +575,7 @@ cmatrix_t QubitBackend::noise_matrix2(const cmatrix_t &U,
 // Noise Processes
 //------------------------------------------------------------------------------
 
-void QubitBackend::qc_relax(const uint_t qubit, const double time) {
+void QubitBackend::qc_relax(const std::uint64_t qubit, const double time) {
   // applies relaxation to a qubit
   if (time > 0 && noise.relax.rate > 0) {
 #ifdef DEBUG
@@ -589,7 +589,7 @@ void QubitBackend::qc_relax(const uint_t qubit, const double time) {
   }
 }
 
-void QubitBackend::qc_matrix1_noise(const uint_t qubit, const cmatrix_t &U,
+void QubitBackend::qc_matrix1_noise(const std::uint64_t qubit, const cmatrix_t &U,
                                     const GateError &err) {
 // applyes unitary matrix with T1 relaxation error
 #ifdef DEBUG

@@ -77,7 +77,7 @@ public:
    * @param dim: dimension of each subsystem (typically 2 for a qubit)
    * @returns: true if noise parameters are valid
    */
-  bool verify(uint_t dim) const;
+  bool verify(std::uint64_t dim) const;
 };
 
 /*******************************************************************************
@@ -125,7 +125,7 @@ public:
    * @param dim: dimension of each subsystem (typically 2 for a qubit)
    * @returns: true if noise parameters are valid
    ***/
-  bool verify(uint_t dim) const;
+  bool verify(std::uint64_t dim) const;
 };
 
 /*******************************************************************************
@@ -184,7 +184,7 @@ public:
    * @param dim: dimension of each subsystem (typically 2 for a qubit)
    * @returns: true if noise parameters are valid
    ***/
-  bool verify(uint_t dim) const;
+  bool verify(std::uint64_t dim) const;
 };
 
 /*******************************************************************************
@@ -195,14 +195,14 @@ public:
 
 class PauliChannel {
 public:
-  uint_t n = 0;
+  std::uint64_t n = 0;
   bool ideal = true;
   std::discrete_distribution<> p;
 
   // Constructors
   PauliChannel(){};
-  explicit PauliChannel(uint_t nq) : n(nq){};
-  PauliChannel(uint_t nq, rvector_t p_pauli);
+  explicit PauliChannel(std::uint64_t nq) : n(nq){};
+  PauliChannel(std::uint64_t nq, rvector_t p_pauli);
 
   // Get vector of error probabilities eg {pX, pY, pZ}
   rvector_t p_errors() const;
@@ -249,7 +249,7 @@ public:
    * @param dim: dimension of each subsystem (typically 2 for a qubit)
    * @returns: true if noise parameters are valid
    ***/
-  bool verify(uint_t dim) const;
+  bool verify(std::uint64_t dim) const;
 };
 
 /*******************************************************************************
@@ -282,7 +282,7 @@ public:
    * @param dim: dimension of each subsystem (typically 2 for a qubit)
    * @returns: true if noise parameters are valid
    ***/
-  bool verify(uint_t dim = 2);
+  bool verify(std::uint64_t dim = 2);
 };
 
 /*******************************************************************************
@@ -309,7 +309,7 @@ Relaxation::Relaxation(double rate1, const rvector_t &pops)
     : Relaxation(rate1,
                  std::discrete_distribution<>(pops.begin(), pops.end())) {}
 
-bool Relaxation::verify(uint_t dim) const {
+bool Relaxation::verify(std::uint64_t dim) const {
   // Check Relaxation
   if (populations.probabilities().size() > dim) {
     std::cerr << "error: thermal_populations vector is too long" << std::endl;
@@ -361,7 +361,7 @@ ResetError::ResetError(const std::discrete_distribution<> &probs) : p(probs) {
 ResetError::ResetError(const rvector_t &probs)
     : ResetError(std::discrete_distribution<>(probs.begin(), probs.end())) {}
 
-bool ResetError::verify(uint_t dim) const {
+bool ResetError::verify(std::uint64_t dim) const {
   if (p.probabilities().size() > dim) {
     std::cerr << "error: reset.p error vector is too long" << std::endl;
     return false;
@@ -434,7 +434,7 @@ ReadoutError::ReadoutError(const std::vector<rvector_t> &probs) {
 #endif
 }
 
-bool ReadoutError::verify(uint_t dim) const {
+bool ReadoutError::verify(std::uint64_t dim) const {
   if (p.size() > dim) {
     std::cerr << "error: readout_error.p error vector is too long" << std::endl;
     return false;
@@ -496,13 +496,13 @@ inline void from_json(const json_t &noise, ReadoutError &error) {
  *
  ******************************************************************************/
 
-PauliChannel::PauliChannel(uint_t nq, rvector_t p_pauli) : n(nq) {
+PauliChannel::PauliChannel(std::uint64_t nq, rvector_t p_pauli) : n(nq) {
   set_p(p_pauli);
 }
 
 void PauliChannel::set_p(rvector_t p_pauli) {
   // Get pI error prob
-  uint_t N = 1ULL << (2 * n);
+  std::uint64_t N = 1ULL << (2 * n);
   double tot = 0;
   for (auto &pj : p_pauli)
     tot += pj;
@@ -530,7 +530,7 @@ rvector_t PauliChannel::p_errors() const {
  *
  ******************************************************************************/
 
-bool GateError::verify(uint_t dim) const {
+bool GateError::verify(std::uint64_t dim) const {
   if (pauli.p.probabilities().size() > dim * dim) {
     std::cerr << "error: pauli error vector is wrong length." << std::endl;
     return false;
@@ -554,7 +554,7 @@ inline void to_json(json_t &js, const GateError &error) {
   }
 }
 
-inline GateError load_gate_error(std::string key, uint_t nq, const json_t &js) {
+inline GateError load_gate_error(std::string key, std::uint64_t nq, const json_t &js) {
 
   GateError error = GateError();
   error.label = key;
@@ -579,7 +579,7 @@ inline GateError load_gate_error(std::string key, uint_t nq, const json_t &js) {
   // Load Pauli Error
   double p_depol = 0.;
   rvector_t p_pauli;
-  uint_t N = 1ULL << (2 * nq);
+  std::uint64_t N = 1ULL << (2 * nq);
   JSON::get_value(p_pauli, "p_pauli", noise);
   if (JSON::get_value(p_depol, "p_depol", noise) && p_depol > 0.) {
     p_pauli.resize(N - 1);
@@ -597,11 +597,11 @@ inline GateError load_gate_error(std::string key, uint_t nq, const json_t &js) {
  *
  ******************************************************************************/
 
-bool QubitNoise::verify(uint_t dim) {
+bool QubitNoise::verify(std::uint64_t dim) {
   bool pass = reset.verify(dim) && readout.verify(dim) && relax.verify(dim);
 
   for (const auto &g : gate) {
-    uint_t dim2 = (g.first == "CX" || g.first == "CZ") ? dim * dim : dim;
+    std::uint64_t dim2 = (g.first == "CX" || g.first == "CZ") ? dim * dim : dim;
     pass = pass && g.second.verify(dim2);
   }
   return pass;

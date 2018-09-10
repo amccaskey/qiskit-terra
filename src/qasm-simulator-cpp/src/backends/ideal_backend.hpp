@@ -67,17 +67,17 @@ protected:
    ************************/
   cvector_t vectorize_matrix(const cmatrix_t &mat) const;
 
-  void qc_matrix1(const uint_t qubit, const cmatrix_t &U) {
+  void qc_matrix1(const std::uint64_t qubit, const cmatrix_t &U) {
     qreg.apply_matrix(qubit, vectorize_matrix(U));
   };
-  void qc_matrix2(const uint_t qubit0, const uint_t qubit1, const cmatrix_t &U){
+  void qc_matrix2(const std::uint64_t qubit0, const std::uint64_t qubit1, const cmatrix_t &U){
     qreg.apply_matrix<2>({{qubit0, qubit1}}, vectorize_matrix(U));
   };
 
-  inline void qc_matrix1(const uint_t qubit, const cvector_t &U) {
+  inline void qc_matrix1(const std::uint64_t qubit, const cvector_t &U) {
     qreg.apply_matrix(qubit, U);
   };
-  inline void qc_matrix2(const uint_t qubit0, const uint_t qubit1, const cvector_t &U) {
+  inline void qc_matrix2(const std::uint64_t qubit0, const std::uint64_t qubit1, const cvector_t &U) {
     qreg.apply_matrix<2>({{qubit0, qubit1}}, U);
   };
 
@@ -85,9 +85,9 @@ protected:
    * Measurement and Reset
    ************************/
 
-  virtual void qc_reset(const uint_t qubit, const uint_t state = 0);
-  virtual void qc_measure(const uint_t qubit, const uint_t bit);
-  virtual std::pair<uint_t, double> qc_measure_outcome(const uint_t qubit);
+  virtual void qc_reset(const std::uint64_t qubit, const std::uint64_t state = 0);
+  virtual void qc_measure(const std::uint64_t qubit, const std::uint64_t bit);
+  virtual std::pair<std::uint64_t, double> qc_measure_outcome(const std::uint64_t qubit);
 
   /************************
    * 1-Qubit Gates
@@ -96,19 +96,19 @@ protected:
                                  const double lambda);
   virtual cvector_t waltz_vectorized_matrix(const double theta, const double phi,
                                             const double lambda);
-  virtual void qc_gate(const uint_t qubit, const double theta, const double phi,
+  virtual void qc_gate(const std::uint64_t qubit, const double theta, const double phi,
                        const double lambda);
-  virtual void qc_gate_x(const uint_t qubit);
-  virtual void qc_gate_y(const uint_t qubit);
-  virtual void qc_phase(const uint_t qubit, const complex_t phase);
-  virtual void qc_zrot(const uint_t qubit, const double lambda);
+  virtual void qc_gate_x(const std::uint64_t qubit);
+  virtual void qc_gate_y(const std::uint64_t qubit);
+  virtual void qc_phase(const std::uint64_t qubit, const complex_t phase);
+  virtual void qc_zrot(const std::uint64_t qubit, const double lambda);
 
   /************************
    * 2-Qubit Gates
    ************************/
-  virtual void qc_cnot(const uint_t qctrl, const uint_t qtrgt);
-  virtual void qc_cz(const uint_t q0, const uint_t q1);
-  virtual void qc_zzrot(const uint_t q0, const uint_t q1, double lambda);
+  virtual void qc_cnot(const std::uint64_t qctrl, const std::uint64_t qtrgt);
+  virtual void qc_cz(const std::uint64_t q0, const std::uint64_t q1);
+  virtual void qc_zzrot(const std::uint64_t q0, const std::uint64_t q1, double lambda);
 };
 
 /*******************************************************************************
@@ -314,7 +314,7 @@ cvector_t IdealBackend::vectorize_matrix(const cmatrix_t &mat) const {
 // 1-Qubit Ideal Gates
 //------------------------------------------------------------------------------
 
-void IdealBackend::qc_gate(const uint_t qubit, const double theta,
+void IdealBackend::qc_gate(const std::uint64_t qubit, const double theta,
                            const double phi, const double lambda) {
 #ifdef DEBUG
   std::stringstream ss;
@@ -325,7 +325,7 @@ void IdealBackend::qc_gate(const uint_t qubit, const double theta,
   qreg.apply_matrix(qubit, waltz_vectorized_matrix(theta, phi, lambda));
 }
 
-void IdealBackend::qc_gate_x(const uint_t qubit) {
+void IdealBackend::qc_gate_x(const std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG IdealBackend::qc_gate_x(" << qubit << ")";
@@ -334,7 +334,7 @@ void IdealBackend::qc_gate_x(const uint_t qubit) {
   qreg.apply_x(qubit);
 }
 
-void IdealBackend::qc_gate_y(const uint_t qubit) {
+void IdealBackend::qc_gate_y(const std::uint64_t qubit) {
 // Optimized pauli Y gate
 #ifdef DEBUG
   std::stringstream ss;
@@ -344,7 +344,7 @@ void IdealBackend::qc_gate_y(const uint_t qubit) {
   qreg.apply_y(qubit);
 }
 
-void IdealBackend::qc_phase(const uint_t qubit, const complex_t phase) {
+void IdealBackend::qc_phase(const std::uint64_t qubit, const complex_t phase) {
 // optimized Z rotation (see useful_matrices.RZ)
 #ifdef DEBUG
   std::stringstream ss;
@@ -354,7 +354,7 @@ void IdealBackend::qc_phase(const uint_t qubit, const complex_t phase) {
   qreg.apply_matrix(qubit, cvector_t({1., phase}));
 }
 
-void IdealBackend::qc_zrot(const uint_t qubit, const double lambda) {
+void IdealBackend::qc_zrot(const std::uint64_t qubit, const double lambda) {
 // optimized Z rotation
 #ifdef DEBUG
   std::stringstream ss;
@@ -368,7 +368,7 @@ void IdealBackend::qc_zrot(const uint_t qubit, const double lambda) {
 // 2-Qubit Ideal Gates
 //------------------------------------------------------------------------------
 
-void IdealBackend::qc_cnot(const uint_t q_ctrl, const uint_t q_trgt) {
+void IdealBackend::qc_cnot(const std::uint64_t q_ctrl, const std::uint64_t q_trgt) {
 // optimized ideal CNOT on two qubits
 #ifdef DEBUG
   std::stringstream ss;
@@ -378,7 +378,7 @@ void IdealBackend::qc_cnot(const uint_t q_ctrl, const uint_t q_trgt) {
   qreg.apply_cnot(q_ctrl, q_trgt);
 }
 
-void IdealBackend::qc_cz(const uint_t q_ctrl, const uint_t q_trgt) {
+void IdealBackend::qc_cz(const std::uint64_t q_ctrl, const std::uint64_t q_trgt) {
 // optimized ideal CZ gate on two qubits
 #ifdef DEBUG
   std::stringstream ss;
@@ -388,7 +388,7 @@ void IdealBackend::qc_cz(const uint_t q_ctrl, const uint_t q_trgt) {
   qreg.apply_cz(q_ctrl, q_trgt);
 }
 
-void IdealBackend::qc_zzrot(const uint_t q0, const uint_t q1,
+void IdealBackend::qc_zzrot(const std::uint64_t q0, const std::uint64_t q1,
                             const double lambda) {
 // optimized ZZ rotation
 // Has overall global phase set so that
@@ -432,7 +432,7 @@ cvector_t IdealBackend::waltz_vectorized_matrix(double theta, double phi, double
 // Measurement
 //------------------------------------------------------------------------------
 
-void IdealBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
+void IdealBackend::qc_measure(const std::uint64_t qubit, const std::uint64_t cbit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG IdealBackend::qc_measure(" << qubit << "," << cbit << ")";
@@ -440,7 +440,7 @@ void IdealBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
 #endif
 
   // Actual measurement outcome
-  const std::pair<uint_t, double> meas = qc_measure_outcome(qubit);
+  const std::pair<std::uint64_t, double> meas = qc_measure_outcome(qubit);
   creg[cbit] = meas.first; // Update register outcome
 
   // Implement measurement
@@ -449,28 +449,28 @@ void IdealBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
   qreg.apply_matrix(qubit, mdiag);
 }
 
-std::pair<uint_t, double> IdealBackend::qc_measure_outcome(const uint_t qubit) {
+std::pair<std::uint64_t, double> IdealBackend::qc_measure_outcome(const std::uint64_t qubit) {
 
   // Probability of P0 outcome
   double p0 = qreg.probability(qubit, 0);
   rvector_t probs = {p0, 1. - p0};
   // randomly pick outcome
-  const uint_t n = rng.rand_int(probs);
-  return std::pair<uint_t, double>(n, probs[n]);
+  const std::uint64_t n = rng.rand_int(probs);
+  return std::pair<std::uint64_t, double>(n, probs[n]);
 }
 
 //------------------------------------------------------------------------------
 // Reset
 //------------------------------------------------------------------------------
 
-void IdealBackend::qc_reset(const uint_t qubit, const uint_t state) {
+void IdealBackend::qc_reset(const std::uint64_t qubit, const std::uint64_t state) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG IdealBackend::reset(" << qubit << ", " << state << ")";
   std::clog << ss.str() << std::endl;
 #endif
   // Simulate unobserved measurement
-  const std::pair<uint_t, double> meas = qc_measure_outcome(qubit);
+  const std::pair<std::uint64_t, double> meas = qc_measure_outcome(qubit);
   cvector_t mdiag(2, 0.);
   mdiag[meas.first] = 1. / std::sqrt(meas.second);
   qreg.apply_matrix(qubit, mdiag);

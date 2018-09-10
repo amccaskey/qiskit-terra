@@ -14,6 +14,8 @@
 #ifndef _BaseEngine_h_
 #define _BaseEngine_h_
 
+#include <stdint.h>
+
 #include "base_backend.hpp"
 #include "circuit.hpp"
 #include "noise_models.hpp"
@@ -68,7 +70,7 @@ public:
   //============================================================================
 
   // Counts
-  uint_t total_shots = 0; // Number of shots to obtain current results
+  std::uint64_t total_shots = 0; // Number of shots to obtain current results
   double time_taken = 0.; // Time taken for simulation of current results
   counts_t counts;        // Map of observed final creg values
 
@@ -102,10 +104,10 @@ public:
    * @param nshots the number of simulation shots to run
    */
   virtual void run_program(const Circuit &circ, BaseBackend<StateType> *be,
-                           uint_t nshots = 1);
+                           std::uint64_t nshots = 1);
   virtual void initialize(BaseBackend<StateType> *be);
   virtual void execute(const Circuit &circ, BaseBackend<StateType> *be,
-                       uint_t nshots);
+                       std::uint64_t nshots);
 
   /**
    * Adds results data from another engine.
@@ -142,7 +144,7 @@ public:
 template <typename StateType>
 void BaseEngine<StateType>::run_program(const Circuit &prog,
                                         BaseBackend<StateType> *be,
-                                        uint_t nshots) {
+                                        std::uint64_t nshots) {
   initialize(be);
   execute(prog, be, nshots);
   total_shots += nshots;
@@ -157,8 +159,8 @@ void BaseEngine<StateType>::initialize(BaseBackend<StateType> *be) {
 
 template <typename StateType>
 void BaseEngine<StateType>::execute(const Circuit &prog, BaseBackend<StateType> *be,
-                                    uint_t nshots) {
-  for (uint_t ishot = 0; ishot < nshots; ++ishot) {
+                                    std::uint64_t nshots) {
+  for (std::uint64_t ishot = 0; ishot < nshots; ++ishot) {
     be->initialize(prog);
     be->execute(prog.operations);
     compute_results(prog, be);
@@ -184,11 +186,11 @@ void BaseEngine<StateType>::compute_counts(const reglist clbit_labels,
                                            const creg_t &creg) {
   if (counts_show || show_final_creg) {
     std::string shotstr;
-    uint_t shift = 0;
+    std::uint64_t shift = 0;
 
     for (const auto &reg : clbit_labels) {
-      uint_t sz = reg.second;
-      for (uint_t j = 0; j < sz; j++) {
+      std::uint64_t sz = reg.second;
+      for (std::uint64_t j = 0; j < sz; j++) {
         shotstr += std::to_string(creg[shift + j]);
       }
       shift += sz;

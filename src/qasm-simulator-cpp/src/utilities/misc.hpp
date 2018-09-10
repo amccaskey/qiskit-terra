@@ -210,7 +210,7 @@ cmatrix_t devectorize(const cvector_t &vec);
  * @param base: representation base (default is 2 for bitstrings)
  * @return: a dit-string
  */
-std::string int2string(uint_t n, uint_t base = 2);
+std::string int2string(std::uint64_t n, std::uint64_t base = 2);
 
 /**
  * Converts an integer into a integer base string representation and pads with
@@ -220,7 +220,7 @@ std::string int2string(uint_t n, uint_t base = 2);
  * @param length: length of the padded string
  * @return: a fixed length dit-string
  */
-std::string int2string(uint_t n, uint_t base, uint_t length);
+std::string int2string(std::uint64_t n, std::uint64_t base, std::uint64_t length);
 
 /**
  * Converts an integer into vector of ints, where the least significant dit is
@@ -230,8 +230,8 @@ std::string int2string(uint_t n, uint_t base, uint_t length);
  * @param minlen: minimum length of the returned vector
  * @return: a vector of ints
  */
-std::vector<uint_t> int2reg(uint_t n, uint_t base = 2);
-std::vector<uint_t> int2reg(uint_t n, uint_t base, uint_t minlen);
+std::vector<std::uint64_t> int2reg(std::uint64_t n, std::uint64_t base = 2);
+std::vector<std::uint64_t> int2reg(std::uint64_t n, std::uint64_t base, std::uint64_t minlen);
 
 /**
  * Write me
@@ -250,7 +250,7 @@ std::string format_bitstr(std::string str, const creg_t &regs);
  * @param epsilon: threshold for truncating small values to zero
  * @return: a map representation of non-zero state vector components
  */
-cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon,
+cket_t vec2ket(const cvector_t &psi, std::uint64_t dit, double epsilon,
                const creg_t &regs);
 
 /**
@@ -261,7 +261,7 @@ cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon,
  * @param epsilon: threshold for truncating small values to zero
  * @return: a map representation of non-zero state vector components
  */
-cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon);
+cket_t vec2ket(const cvector_t &psi, std::uint64_t dit, double epsilon);
 
 /**
  * Converts an n-qubit complex vector into a sparse state vector representation
@@ -281,7 +281,7 @@ cket_t vec2ket(const cvector_t &psi, double epsilon = 0.);
  * @param str: a hex string.
  * @returns: a binary vector.
  */
-std::vector<uint_t> hex2reg(std::string str);
+std::vector<std::uint64_t> hex2reg(std::string str);
 
 //------------------------------------------------------------------------------
 // Pad unitary matrices to larger dimensions
@@ -294,7 +294,7 @@ std::vector<uint_t> hex2reg(std::string str);
  * @param dit: dimension for the enlarged matrix (must be >= current dim)
  * @return: a dit x dit matrix
  */
-cmatrix_t qudit_unitary1(const cmatrix_t &U1, uint_t dit);
+cmatrix_t qudit_unitary1(const cmatrix_t &U1, std::uint64_t dit);
 
 /**
  * Pads a two-system unitary matrix to a unitary matrix on a larger dimension
@@ -303,7 +303,7 @@ cmatrix_t qudit_unitary1(const cmatrix_t &U1, uint_t dit);
  * @param dit: subsystem dim for the enlarged matrix (must be >= current dim)
  * @return: a dit^2 x dit^2 matrix
  */
-cmatrix_t qudit_unitary2(const cmatrix_t &U2, uint_t dit);
+cmatrix_t qudit_unitary2(const cmatrix_t &U2, std::uint64_t dit);
 
 /*******************************************************************************
  *
@@ -566,7 +566,7 @@ template <typename T> void renormalize(matrix<T> &mat) {
 template <typename T>
 std::vector<T> real(const std::vector<std::complex<T>> &vec) {
   std::vector<T> re(vec.size());
-  for (uint_t j = 0; j != vec.size(); j++)
+  for (std::uint64_t j = 0; j != vec.size(); j++)
     re[j] = std::real(vec[j]);
   return re;
 }
@@ -574,18 +574,18 @@ std::vector<T> real(const std::vector<std::complex<T>> &vec) {
 template <typename T>
 std::vector<T> imag(const std::vector<std::complex<T>> &vec) {
   std::vector<T> im(vec.size());
-  for (uint_t j = 0; j != vec.size(); j++)
+  for (std::uint64_t j = 0; j != vec.size(); j++)
     im[j] = std::imag(vec[j]);
   return im;
 }
 
 template <typename T>
 matrix<T> outer_product(const std::vector<T> &ket, const std::vector<T> &bra) {
-  const uint_t d1 = ket.size();
-  const uint_t d2 = bra.size();
+  const std::uint64_t d1 = ket.size();
+  const std::uint64_t d2 = bra.size();
   matrix<T> ret(d1, d2);
-  for (uint_t i = 0; i < d1; i++)
-    for (uint_t j = 0; j < d2; j++) {
+  for (std::uint64_t i = 0; i < d1; i++)
+    for (std::uint64_t j = 0; j < d2; j++) {
       ret(i, j) = ket[i] * conj(bra[j]);
     }
   return ret;
@@ -646,8 +646,8 @@ std::map<T1, T2> &chop(std::map<T1, T2> &map, double epsilon) {
 
 template <typename T> matrix<T> &chop(matrix<T> &mat, double epsilon) {
   if (epsilon > 0.)
-    for (uint_t col = 0; col != mat.GetColumns(); col++)
-      for (uint_t row = 0; row != mat.GetRows(); row++)
+    for (std::uint64_t col = 0; col != mat.GetColumns(); col++)
+      for (std::uint64_t row = 0; row != mat.GetRows(); row++)
         chop(mat(row, col), epsilon);
   return mat;
 }
@@ -657,24 +657,24 @@ template <typename T> matrix<T> &chop(matrix<T> &mat, double epsilon) {
 //------------------------------------------------------------------------------
 
 cmatrix_t devectorize(const cvector_t &vec) {
-  uint_t dim = std::sqrt(vec.size());
+  std::uint64_t dim = std::sqrt(vec.size());
   if (vec.size() != dim * dim) {
     throw std::runtime_error(
         std::string("(devectorize) vector is not a vectorized square matrix"));
   }
   cmatrix_t mat(dim, dim);
-  for (uint_t col = 0; col != dim; col++)
-    for (uint_t row = 0; row != dim; row++)
+  for (std::uint64_t col = 0; col != dim; col++)
+    for (std::uint64_t row = 0; row != dim; row++)
       mat(row, col) = vec[col * dim + row];
   return mat;
 }
 
 cvector_t vectorize(const cmatrix_t &mat) {
-  uint_t ncol = mat.GetColumns();
-  uint_t nrow = mat.GetRows();
+  std::uint64_t ncol = mat.GetColumns();
+  std::uint64_t nrow = mat.GetRows();
   cvector_t vec(ncol * nrow);
-  for (uint_t col = 0; col != ncol; col++)
-    for (uint_t row = 0; row != nrow; row++)
+  for (std::uint64_t col = 0; col != ncol; col++)
+    for (std::uint64_t row = 0; row != nrow; row++)
       vec[col * nrow + row] = mat(row, col);
   return vec;
 }
@@ -683,14 +683,14 @@ cvector_t vectorize(const cmatrix_t &mat) {
 // Convert integers to dit-strings
 //------------------------------------------------------------------------------
 
-std::string int2string(uint_t n, uint_t base) {
+std::string int2string(std::uint64_t n, std::uint64_t base) {
   if (n < base)
     return std::to_string(n);
   else
     return int2string(n / base, base) + std::to_string(n % base);
 }
 
-std::string int2string(uint_t n, uint_t base, uint_t minlen) {
+std::string int2string(std::uint64_t n, std::uint64_t base, std::uint64_t minlen) {
   std::string s = int2string(n, base);
   auto l = s.size();
   if (l < minlen)
@@ -702,8 +702,8 @@ std::string int2string(uint_t n, uint_t base, uint_t minlen) {
 // Convert integers to dit-vectors
 //------------------------------------------------------------------------------
 
-std::vector<uint_t> int2reg(uint_t n, uint_t base) {
-  std::vector<uint_t> ret;
+std::vector<std::uint64_t> int2reg(std::uint64_t n, std::uint64_t base) {
+  std::vector<std::uint64_t> ret;
   while (n >= base) {
     ret.push_back(n % base);
     n /= base;
@@ -712,8 +712,8 @@ std::vector<uint_t> int2reg(uint_t n, uint_t base) {
   return ret;
 }
 
-std::vector<uint_t> int2reg(uint_t n, uint_t base, uint_t minlen) {
-  std::vector<uint_t> ret = int2reg(n, base);
+std::vector<std::uint64_t> int2reg(std::uint64_t n, std::uint64_t base, std::uint64_t minlen) {
+  std::vector<std::uint64_t> ret = int2reg(n, base);
   if (ret.size() < minlen) // pad vector with zeros
     ret.resize(minlen);
   return ret;
@@ -723,8 +723,8 @@ std::vector<uint_t> int2reg(uint_t n, uint_t base, uint_t minlen) {
 // Convert hexadecimal string to binary vector
 //------------------------------------------------------------------------------
 
-std::vector<uint_t> hex2reg(std::string str) {
-  std::vector<uint_t> reg;
+std::vector<std::uint64_t> hex2reg(std::string str) {
+  std::vector<std::uint64_t> reg;
   std::string prefix = str.substr(0, 2);
   if (prefix == "0x" || prefix == "0X") { // Hexadecimal
     str.erase(0, 2); // remove '0x';
@@ -732,12 +732,12 @@ std::vector<uint_t> hex2reg(std::string str) {
     reg.reserve(length);
     while (str.size() > 8) {
       unsigned long hex = stoul(str.substr(str.size() - 8), 0, 16);
-      std::vector<uint_t> tmp = int2reg(hex, 2, 32);
+      std::vector<std::uint64_t> tmp = int2reg(hex, 2, 32);
       std::move(tmp.begin(), tmp.end(), back_inserter(reg));
       str.erase(str.size() - 8);
     }
     if (str.size() > 0) {
-      std::vector<uint_t> tmp = int2reg(stoul(str, 0, 16), 2, 0);
+      std::vector<std::uint64_t> tmp = int2reg(stoul(str, 0, 16), 2, 0);
       std::move(tmp.begin(), tmp.end(), back_inserter(reg));
     }
     return reg;
@@ -766,7 +766,7 @@ std::string format_bitstr(std::string str, const creg_t &regs) {
     std::string ret = "";
     unsigned long shift = 0;
     for (const auto &sz : regs) {
-      for (uint_t j = 0; j != sz; ++j)
+      for (std::uint64_t j = 0; j != sz; ++j)
         ret += str[shift + j]; // CS bit-ordering
       ret += " ";
       shift += sz;
@@ -777,7 +777,7 @@ std::string format_bitstr(std::string str, const creg_t &regs) {
   }
 }
 
-cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon,
+cket_t vec2ket(const cvector_t &psi, std::uint64_t dit, double epsilon,
                const creg_t &regs) {
 
   cvector_t vec = psi;
@@ -791,7 +791,7 @@ cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon,
   }
 
   cket_t ketmap;
-  for (uint_t k = 0; k != vec.size(); ++k) {
+  for (std::uint64_t k = 0; k != vec.size(); ++k) {
     if (std::abs(vec[k]) > 0.) {
       std::string bitstr = int2string(k, dit);
       // pad zeros onto front to reach required length
@@ -804,7 +804,7 @@ cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon,
   return ketmap;
 }
 
-cket_t vec2ket(const cvector_t &psi, uint_t dit, double epsilon) {
+cket_t vec2ket(const cvector_t &psi, std::uint64_t dit, double epsilon) {
   creg_t vec;
   return vec2ket(psi, dit, epsilon, vec);
 }
@@ -817,7 +817,7 @@ cket_t vec2ket(const cvector_t &psi, double epsilon) {
 // Pad unitary matrices to larger dimensions
 //------------------------------------------------------------------------------
 
-cmatrix_t qudit_unitary1(const cmatrix_t &U1, uint_t dit) {
+cmatrix_t qudit_unitary1(const cmatrix_t &U1, std::uint64_t dit) {
 
   if (dit == 2)
     return U1;
@@ -825,25 +825,25 @@ cmatrix_t qudit_unitary1(const cmatrix_t &U1, uint_t dit) {
     cmatrix_t U(dit, dit);
     MOs::Identity(U);
 
-    for (uint_t i = 0; i != 2; ++i)
-      for (uint_t j = 0; j != 2; ++j)
+    for (std::uint64_t i = 0; i != 2; ++i)
+      for (std::uint64_t j = 0; j != 2; ++j)
         U(i, j) = U1(i, j);
 
     return U;
   }
 }
 
-cmatrix_t qudit_unitary2(const cmatrix_t &U2, uint_t dit) {
+cmatrix_t qudit_unitary2(const cmatrix_t &U2, std::uint64_t dit) {
 
   if (dit == 2)
     return U2;
   else {
-    uint_t d = dit * dit;
+    std::uint64_t d = dit * dit;
     cmatrix_t U(d, d);
     MOs::Identity(U);
 
-    for (uint_t i = 0; i != 2; ++i)
-      for (uint_t j = 0; j != 2; ++j) {
+    for (std::uint64_t i = 0; i != 2; ++i)
+      for (std::uint64_t j = 0; j != 2; ++j) {
         U(i, j) = U2(i, j);
         U(i, j + dit) = U2(i, j + 2);
         U(i + dit, j) = U2(i + 2, j);

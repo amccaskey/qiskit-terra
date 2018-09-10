@@ -60,9 +60,9 @@ public:
   std::vector<Circuit> circuits;                   // QISKIT program
 
   // Multithreading Params
-  uint_t max_memory_gb = 16;   // max memory to use
-  uint_t max_threads_shot = 0; // 0 for automatic
-  uint_t max_threads_gate = 0; // 0 for automatic
+  std::uint64_t max_memory_gb = 16;   // max memory to use
+  std::uint64_t max_threads_shot = 0; // 0 for automatic
+  std::uint64_t max_threads_gate = 0; // 0 for automatic
 
   // Constructor
   inline Simulator(){};
@@ -145,8 +145,8 @@ json_t Simulator::run_circuit(Circuit &circ) const {
   json_t ret;                                                  // results JSON
 
   // Check max qubits
-  uint_t max_qubits =
-      static_cast<uint_t>(floor(log2(max_memory_gb * 1e9 / 16.)));
+  std::uint64_t max_qubits =
+      static_cast<std::uint64_t>(floor(log2(max_memory_gb * 1e9 / 16.)));
   if ((simulator == "qubit" || simulator == "ideal") &&
       circ.nqubits > max_qubits) {
     ret["success"] = false;
@@ -166,27 +166,27 @@ json_t Simulator::run_circuit(Circuit &circ) const {
     backend.attach_noise(circ.noise);
 
     // Set RNG Seed
-    uint_t rng_seed = (circ.rng_seed < 0) ? std::random_device()()
-                                          : static_cast<uint_t>(circ.rng_seed);
+    std::uint64_t rng_seed = (circ.rng_seed < 0) ? std::random_device()()
+                                          : static_cast<std::uint64_t>(circ.rng_seed);
 
 // Thread number
 #ifdef _OPENMP
     uint16_t ncpus = omp_get_num_procs(); // OMP method
     omp_set_nested(1);                    // allow nested parallel threads
     ncpus = std::max(static_cast<uint16_t>(1), ncpus); // check 0 edge case
-    int_t dq = (max_qubits > circ.nqubits) ? max_qubits - circ.nqubits : 0;
-    uint_t threads = std::max<uint_t>(1UL, 2 * dq);
+    std::int64_t dq = (max_qubits > circ.nqubits) ? max_qubits - circ.nqubits : 0;
+    std::uint64_t threads = std::max<std::uint64_t>(1UL, 2 * dq);
     if (circ.opt_meas && circ.noise.ideal)
       threads = 1; // single shot thread
     else {
-      threads = std::min<uint_t>(threads, ncpus);
-      threads = std::min<uint_t>(threads, circ.shots);
+      threads = std::min<std::uint64_t>(threads, ncpus);
+      threads = std::min<std::uint64_t>(threads, circ.shots);
       if (max_threads_shot > 0)
-        threads = std::min<uint_t>(max_threads_shot, threads);
+        threads = std::min<std::uint64_t>(max_threads_shot, threads);
     }
-    uint_t gate_threads = std::max<uint_t>(1UL, ncpus / threads);
+    std::uint64_t gate_threads = std::max<std::uint64_t>(1UL, ncpus / threads);
     if (max_threads_gate > 0) {
-      gate_threads = std::min<uint_t>(max_threads_gate, gate_threads);
+      gate_threads = std::min<std::uint64_t>(max_threads_gate, gate_threads);
     }
     if (gate_threads > 0) {
       backend.set_num_threads(gate_threads);
@@ -200,8 +200,8 @@ json_t Simulator::run_circuit(Circuit &circ) const {
     // Parallelized shots loop
     else {
       // Set rng seed for each thread
-      std::vector<std::pair<uint_t, uint_t>> shotseed;
-      for (uint_t j = 0; j < threads; ++j) {
+      std::vector<std::pair<std::uint64_t, std::uint64_t>> shotseed;
+      for (std::uint64_t j = 0; j < threads; ++j) {
         shotseed.push_back(std::make_pair(circ.shots / threads, rng_seed + j));
       }
       shotseed[0].first += (circ.shots % threads);

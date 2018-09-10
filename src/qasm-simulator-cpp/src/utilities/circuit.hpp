@@ -36,7 +36,7 @@
 namespace QISKIT {
 
 // typedef std::map<std::string, gate_t> GateSet;
-typedef std::pair<std::string, uint_t> regType;
+typedef std::pair<std::string, std::uint64_t> regType;
 typedef std::vector<regType> reglist;
 
 /*******************************************************************************
@@ -78,8 +78,8 @@ public:
 
 class Circuit {
 public:
-  uint_t nqubits; // number of qubits
-  uint_t nclbits; // number of classical bits
+  std::uint64_t nqubits; // number of qubits
+  std::uint64_t nclbits; // number of classical bits
   reglist qubit_labels;
   reglist clbit_labels;
   std::vector<operation> operations;
@@ -87,8 +87,8 @@ public:
 
   reglist qubit_sizes;
   std::string name = "";
-  int_t rng_seed = -1;   // backend rng seed
-  uint_t shots = 1;      // number of simulation shots
+  std::int64_t rng_seed = -1;   // backend rng seed
+  std::uint64_t shots = 1;      // number of simulation shots
   bool opt_meas = false; // true if all measurements at end
   json_t config;         // local config
   QubitNoise noise;      // Noise parameters
@@ -184,7 +184,7 @@ void Circuit::parse(const json_t &circuit, const json_t &qobjconf,
 #endif
 
   // Check clbit labels
-  uint_t count = 0;
+  std::uint64_t count = 0;
   for (const auto &reg : clbit_labels)
     count += reg.second;
   if (count != nclbits) {
@@ -351,7 +351,7 @@ reglist Circuit::parse_reglist(const json_t &node) {
     for (auto it = node.begin(); it != node.end(); ++it)
       if (it->is_array() && it->size() == 2) {
         auto jr = *it;
-        regType r{jr[0].get<std::string>(), jr[1].get<uint_t>()};
+        regType r{jr[0].get<std::string>(), jr[1].get<std::uint64_t>()};
         regs.push_back(r);
       }
     return regs;

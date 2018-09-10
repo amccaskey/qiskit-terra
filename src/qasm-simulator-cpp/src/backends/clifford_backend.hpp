@@ -48,40 +48,40 @@ public:
   const static gateset_t gateset;
 
 private:
-  uint_t nqubits;
+  std::uint64_t nqubits;
 
   /************************
    * Measurement and Reset
    ************************/
 
-  void qc_reset(const uint_t qubit, const uint_t state = 0);
-  void qc_measure(const uint_t qubit, const uint_t bit);
+  void qc_reset(const std::uint64_t qubit, const std::uint64_t state = 0);
+  void qc_measure(const std::uint64_t qubit, const std::uint64_t bit);
 
   /************************
    * Gates
    ************************/
 
   // Ideal single-qubit gates
-  void qc_pauli(const uint_t qubit, const uint_t p); // ideal pauli
+  void qc_pauli(const std::uint64_t qubit, const std::uint64_t p); // ideal pauli
 
   // Noisy single qubit gates
-  void qc_idle(const uint_t qubit);     // possibly noisy id
-  void qc_gate_x(const uint_t qubit);   // possibly noisy x
-  void qc_gate_y(const uint_t qubit);   // possibly noisy y
-  void qc_gate_z(const uint_t qubit);   // possibly noisy z
-  void qc_gate_h(const uint_t qubit);   // possibly noisy h
-  void qc_gate_s(const uint_t qubit);   // possibly noisy s
-  void qc_gate_sdg(const uint_t qubit); // possibly noisy sdg
-  void qc_noise(const uint_t qubit, const GateError &gate,
+  void qc_idle(const std::uint64_t qubit);     // possibly noisy id
+  void qc_gate_x(const std::uint64_t qubit);   // possibly noisy x
+  void qc_gate_y(const std::uint64_t qubit);   // possibly noisy y
+  void qc_gate_z(const std::uint64_t qubit);   // possibly noisy z
+  void qc_gate_h(const std::uint64_t qubit);   // possibly noisy h
+  void qc_gate_s(const std::uint64_t qubit);   // possibly noisy s
+  void qc_gate_sdg(const std::uint64_t qubit); // possibly noisy sdg
+  void qc_noise(const std::uint64_t qubit, const GateError &gate,
                 const bool X90 = false); // single qubit gate error
 
   // 2-qubit gates
-  void qc_cnot(const uint_t qubit_c, const uint_t qubit_t);
-  void qc_cz(const uint_t qubit_c, const uint_t qubit_t);
+  void qc_cnot(const std::uint64_t qubit_c, const std::uint64_t qubit_t);
+  void qc_cz(const std::uint64_t qubit_c, const std::uint64_t qubit_t);
   // relaxation
-  void qc_u0(const uint_t qubit, const double m);
-  void qc_relax(const uint_t qubit, const double time); // relaxation error
-  void qc_noise(const uint_t qubit_c, const uint_t qubit_t,
+  void qc_u0(const std::uint64_t qubit, const double m);
+  void qc_relax(const std::uint64_t qubit, const double time); // relaxation error
+  void qc_noise(const std::uint64_t qubit_c, const std::uint64_t qubit_t,
                 const GateError &gate);
 };
 
@@ -235,7 +235,7 @@ const gateset_t CliffordBackend::gateset({// Core gates
 // Measurement
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
+void CliffordBackend::qc_measure(const std::uint64_t qubit, const std::uint64_t cbit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_measure(" << qubit << "," << cbit << ")";
@@ -249,8 +249,8 @@ void CliffordBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
 
   // randomly generate measurement outcome (even if deterministic)
   // this is to be consistant with rng for other engines
-  const uint_t n = rng.rand_int(rvector_t({0.5, 0.5}));
-  const uint_t meas = qreg.MeasZ(qubit, n); // Actual measurement outcome
+  const std::uint64_t n = rng.rand_int(rvector_t({0.5, 0.5}));
+  const std::uint64_t meas = qreg.MeasZ(qubit, n); // Actual measurement outcome
 
   // Update register with noisy outcome
   creg[cbit] =
@@ -261,7 +261,7 @@ void CliffordBackend::qc_measure(const uint_t qubit, const uint_t cbit) {
 // Reset
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_reset(const uint_t qubit, const uint_t state) {
+void CliffordBackend::qc_reset(const std::uint64_t qubit, const std::uint64_t state) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_reset(" << qubit << "," << state << ")";
@@ -269,10 +269,10 @@ void CliffordBackend::qc_reset(const uint_t qubit, const uint_t state) {
 #endif
 
   // reset error state
-  uint_t r = reset_error(state);
+  std::uint64_t r = reset_error(state);
   // randomly generate measurement outcome (even if deterministic)
   // this is to be consistant with rng for other engines
-  const uint_t n = rng.rand_int(rvector_t({0.5, 0.5}));
+  const std::uint64_t n = rng.rand_int(rvector_t({0.5, 0.5}));
   qreg.PrepZ(qubit, n); // ideal reset to |0> state
   if (r == 1)
     qreg.X(qubit); // flip for error
@@ -286,7 +286,7 @@ void CliffordBackend::qc_reset(const uint_t qubit, const uint_t state) {
 // 1-Qubit Gates
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_gate_h(uint_t qubit) {
+void CliffordBackend::qc_gate_h(std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_gate_h(" << qubit << ")";
@@ -304,7 +304,7 @@ void CliffordBackend::qc_gate_h(uint_t qubit) {
   }
 }
 
-void CliffordBackend::qc_gate_s(uint_t qubit) {
+void CliffordBackend::qc_gate_s(std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_gate_s(" << qubit << ")";
@@ -317,7 +317,7 @@ void CliffordBackend::qc_gate_s(uint_t qubit) {
     qc_noise(qubit, gate_error("gate"));
 }
 
-void CliffordBackend::qc_gate_sdg(uint_t qubit) {
+void CliffordBackend::qc_gate_sdg(std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_gate_sdg(" << qubit << ")";
@@ -331,7 +331,7 @@ void CliffordBackend::qc_gate_sdg(uint_t qubit) {
     qc_noise(qubit, gate_error("gate"));
 }
 
-void CliffordBackend::qc_gate_x(uint_t qubit) {
+void CliffordBackend::qc_gate_x(std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_gate_x(" << qubit << ")";
@@ -355,7 +355,7 @@ void CliffordBackend::qc_gate_x(uint_t qubit) {
     qreg.X(qubit);
 }
 
-void CliffordBackend::qc_gate_y(uint_t qubit) {
+void CliffordBackend::qc_gate_y(std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_gate_y(" << qubit << ")";
@@ -382,7 +382,7 @@ void CliffordBackend::qc_gate_y(uint_t qubit) {
     qreg.Y(qubit);
 }
 
-void CliffordBackend::qc_gate_z(uint_t qubit) {
+void CliffordBackend::qc_gate_z(std::uint64_t qubit) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_gate_z(" << qubit << ")";
@@ -395,7 +395,7 @@ void CliffordBackend::qc_gate_z(uint_t qubit) {
     qc_noise(qubit, gate_error("gate"));
 }
 
-void CliffordBackend::qc_idle(uint_t qubit) {
+void CliffordBackend::qc_idle(std::uint64_t qubit) {
 
   if (noise_flag && !gate_error("id").ideal) {
 #ifdef DEBUG
@@ -411,7 +411,7 @@ void CliffordBackend::qc_idle(uint_t qubit) {
 // 2-Qubit Gates
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_cnot(uint_t qubit_c, uint_t qubit_t) {
+void CliffordBackend::qc_cnot(std::uint64_t qubit_c, std::uint64_t qubit_t) {
 
 #ifdef DEBUG
   std::stringstream ss;
@@ -433,7 +433,7 @@ void CliffordBackend::qc_cnot(uint_t qubit_c, uint_t qubit_t) {
   }
 }
 
-void CliffordBackend::qc_cz(uint_t qubit_c, uint_t qubit_t) {
+void CliffordBackend::qc_cz(std::uint64_t qubit_c, std::uint64_t qubit_t) {
 
 #ifdef DEBUG
   std::stringstream ss;
@@ -459,7 +459,7 @@ void CliffordBackend::qc_cz(uint_t qubit_c, uint_t qubit_t) {
 // Ideal Pauli Operators
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_pauli(const uint_t qubit, const uint_t p) {
+void CliffordBackend::qc_pauli(const std::uint64_t qubit, const std::uint64_t p) {
   switch (p) {
   case 0: // id gate
     break;
@@ -491,14 +491,14 @@ void CliffordBackend::qc_pauli(const uint_t qubit, const uint_t p) {
  * S*Y*X90*S = i*Y*Z*H = -X*H
  * S*Z*X90*S = Z*H
  */
-void CliffordBackend::qc_noise(uint_t qubit, const GateError &gate, bool X90) {
+void CliffordBackend::qc_noise(std::uint64_t qubit, const GateError &gate, bool X90) {
 #ifdef DEBUG
   std::cout << "DEBUG: qc_noise(" << qubit << ", " << gate.label << ")"
             << std::endl;
 #endif
 
   // apply pauli channel error
-  int_t err = rng.rand_int(gate.pauli.p);
+  std::int64_t err = rng.rand_int(gate.pauli.p);
 
   // Swap for hadamard gate error
   if (X90 && err == 1)
@@ -515,10 +515,10 @@ void CliffordBackend::qc_noise(uint_t qubit, const GateError &gate, bool X90) {
 // 2-Qubit Gate Noise
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_noise(const uint_t qubit_c, const uint_t qubit_t,
+void CliffordBackend::qc_noise(const std::uint64_t qubit_c, const std::uint64_t qubit_t,
                                const GateError &err) {
   // apply pauli channel error
-  uint_t j = rng.rand_int(err.pauli.p);
+  std::uint64_t j = rng.rand_int(err.pauli.p);
   if (j > 0) {
     qc_pauli(qubit_c, j % 4);
     qc_pauli(qubit_t, j / 4);
@@ -532,7 +532,7 @@ void CliffordBackend::qc_noise(const uint_t qubit_c, const uint_t qubit_t,
 // Relaxation
 //------------------------------------------------------------------------------
 
-void CliffordBackend::qc_relax(const uint_t qubit, const double time) {
+void CliffordBackend::qc_relax(const std::uint64_t qubit, const double time) {
   if (time > 0 && noise.relax.rate > 0) {
 #ifdef DEBUG
     std::stringstream ss;
@@ -547,7 +547,7 @@ void CliffordBackend::qc_relax(const uint_t qubit, const double time) {
   }
 }
 
-void CliffordBackend::qc_u0(const uint_t qubit, const double n) {
+void CliffordBackend::qc_u0(const std::uint64_t qubit, const double n) {
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG CliffordBackend::qc_u0(" << qubit << "," << n << ")";

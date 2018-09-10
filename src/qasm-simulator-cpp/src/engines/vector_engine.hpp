@@ -48,13 +48,13 @@ class VectorEngine : public BaseEngine<QubitVector> {
 
 public:
   // Default constructor
-  explicit VectorEngine(uint_t dim = 2)
+  explicit VectorEngine(std::uint64_t dim = 2)
       : BaseEngine<QubitVector>(), qudit_dim(dim){};
   ~VectorEngine() = default;
   //============================================================================
   // Configuration
   //============================================================================
-  uint_t qudit_dim = 2;   // dimension of each qubit as qudit
+  std::uint64_t qudit_dim = 2;   // dimension of each qubit as qudit
   double epsilon = 1e-10; // Chop small numbers
 
   bool show_snapshots_ket = false;           // show snapshots as ket-vector
@@ -81,7 +81,7 @@ public:
   //============================================================================
   // Methods
   //============================================================================
-  void execute(const Circuit &circ, BaseBackend<QubitVector> *be, uint_t nshots) override;
+  void execute(const Circuit &circ, BaseBackend<QubitVector> *be, std::uint64_t nshots) override;
 
   // Adds results data from another engine.
   void add(const VectorEngine &eng);
@@ -95,12 +95,12 @@ public:
   // Compute results
   void compute_results(const Circuit &circ, BaseBackend<QubitVector> *be) override;
   template<class T>
-  void sample_counts(const Circuit &prog, BaseBackend<QubitVector> *be, uint_t nshots,
+  void sample_counts(const Circuit &prog, BaseBackend<QubitVector> *be, std::uint64_t nshots,
                      const std::vector<T> &probs, const std::vector<operation> &meas,
-                     const std::vector<uint_t> &meas_qubits);
+                     const std::vector<std::uint64_t> &meas_qubits);
   // Additional snapshot formatting
   void snapshot_ketform(const std::map<std::string, QubitVector>& qreg_snapshots,
-                        const std::vector<uint_t> &labels);
+                        const std::vector<std::uint64_t> &labels);
   void snapshot_density_matrix(const std::map<std::string, QubitVector>& qreg_snapshots);
   void snapshot_probabilities(const std::map<std::string, QubitVector>& qreg_snapshots);
   void snapshot_inner_products(const std::map<std::string, QubitVector>& qreg_snapshots);
@@ -158,7 +158,7 @@ void VectorEngine::add(const VectorEngine &eng) {
 }
 
 void VectorEngine::execute(const Circuit &prog, BaseBackend<QubitVector> *be,
-                           uint_t nshots) {
+                           std::uint64_t nshots) {
 
   // Check to see if circuit is ideal and allows for measurement optimization
   if (prog.opt_meas && prog.noise.ideal) {
@@ -168,7 +168,7 @@ void VectorEngine::execute(const Circuit &prog, BaseBackend<QubitVector> *be,
     total_shots -= (nshots-1);
 
     // Find position of first measurement operation
-    uint_t pos = 0;
+    std::uint64_t pos = 0;
     while (pos < prog.operations.size() &&
            prog.operations[pos].id != gate_t::Measure) {
       pos++;
@@ -187,7 +187,7 @@ void VectorEngine::execute(const Circuit &prog, BaseBackend<QubitVector> *be,
     // Get measurement operations and set of measured qubits
     std::vector<operation> meas(prog.operations.begin() + pos,
                                 prog.operations.end());
-    std::vector<uint_t> meas_qubits;
+    std::vector<std::uint64_t> meas_qubits;
     for (const auto &op : meas)
       meas_qubits.push_back(op.qubits[0]);
 
@@ -199,7 +199,7 @@ void VectorEngine::execute(const Circuit &prog, BaseBackend<QubitVector> *be,
     bool probs_in_place = true;
     if (probs_in_place && meas_qubits.size() == prog.nqubits) {
       cvector_t &cprobs = be->access_qreg().vector();
-      for (uint_t j=0; j < cprobs.size(); j++) {
+      for (std::uint64_t j=0; j < cprobs.size(); j++) {
         cprobs[j] = std::real(cprobs[j] * std::conj(cprobs[j]));
       }
       // Sample measurement outcomes
@@ -217,21 +217,21 @@ void VectorEngine::execute(const Circuit &prog, BaseBackend<QubitVector> *be,
 
 // Templated so works for real or complex probability vector
 template<class T>
-void VectorEngine::sample_counts(const Circuit &prog, BaseBackend<QubitVector> *be, uint_t nshots,
+void VectorEngine::sample_counts(const Circuit &prog, BaseBackend<QubitVector> *be, std::uint64_t nshots,
                                  const std::vector<T> &probs, const std::vector<operation> &meas,
-                                 const std::vector<uint_t> &meas_qubits) {
+                                 const std::vector<std::uint64_t> &meas_qubits) {
   // Map to store measured outcome after
-  std::map<uint_t, uint_t> outcomes;
+  std::map<std::uint64_t, std::uint64_t> outcomes;
   for (auto &qubit : meas_qubits)
     outcomes[qubit] = 0;
-  const uint_t N = meas_qubits.size(); // number of measured qubits
+  const std::uint64_t N = meas_qubits.size(); // number of measured qubits
 
   // Sample measurement outcomes
   auto &rng = be->access_rng();
-  for (uint_t shot = 0; shot < nshots; shot++) {
+  for (std::uint64_t shot = 0; shot < nshots; shot++) {
     double p = 0.;
     double r = rng.rand(0, 1);
-    uint_t result;
+    std::uint64_t result;
     for (result = 0; result < (1ULL << N); result++) {
       if (r < (p += std::real(probs[result])))
         break;
@@ -252,7 +252,7 @@ void VectorEngine::sample_counts(const Circuit &prog, BaseBackend<QubitVector> *
 //------------------------------------------------------------------------------
 
 void VectorEngine::snapshot_ketform(const std::map<std::string, QubitVector>& qreg_snapshots,
-                                    const std::vector<uint_t> &labels) {
+                                    const std::vector<std::uint64_t> &labels) {
   if (show_snapshots_ket || show_snapshots_probs_ket) {
     for (auto const &psi : qreg_snapshots) {
       cket_t psi_ket = vec2ket(psi.second.vector(), qudit_dim, epsilon, labels);
@@ -334,7 +334,7 @@ void VectorEngine::compute_results(const Circuit &qasm, BaseBackend<QubitVector>
   if (snapshots.empty() == false) {
 
     // String labels for ket form
-    std::vector<uint_t> ket_regs;
+    std::vector<std::uint64_t> ket_regs;
     for (auto it = qasm.qubit_sizes.crbegin(); it != qasm.qubit_sizes.crend(); ++it)
       ket_regs.push_back(it->second);
     // Snapshot ket-form of state vector or probabilities

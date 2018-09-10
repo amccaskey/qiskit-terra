@@ -23,6 +23,7 @@
 #include <map>
 #include <vector>
 #include <stdint.h>
+#include <set>
 
 #include "qubit_vector.hpp"  // N-qubit vector class
 #include "binary_vector.hpp" // Binary Vector class
@@ -37,8 +38,8 @@
  ******************************************************************************/
 
 // Numeric Types
-using int_t = int64_t;
-using uint_t = uint64_t;
+// using int_t = int64_t;
+// using uint_t = uint64_t;
 using complex_t = std::complex<double>;
 using cvector_t = std::vector<complex_t>;
 using rvector_t = std::vector<double>;
@@ -53,13 +54,13 @@ using QV::QubitVector;
 
 // Register Types
 using svector_t = std::vector<std::string>;
-using creg_t = std::vector<uint_t>;
+using creg_t = std::vector<std::uint64_t>;
 using cket_t = std::map<std::string, complex_t>;
 using rket_t = std::map<std::string, double>;
 
 // Output types
-using counts_t = std::map<std::string, uint_t>;
-using count_pair_t = std::pair<std::string, uint_t>;
+using counts_t = std::map<std::string, std::uint64_t>;
+using count_pair_t = std::pair<std::string, std::uint64_t>;
 
 // JSON type
 using json_t = nlohmann::json;
@@ -230,7 +231,7 @@ void from_json(const json_t &js, cvector_t &vec);
  * @param js a json_t object to contain converted type.
  * @param map a map to convert.
  */
-template <typename T> void to_json(json_t &js, const std::map<uint_t, T> &map);
+template <typename T> void to_json(json_t &js, const std::map<std::uint64_t, T> &map);
 
 } // end namespace std.
 
@@ -383,14 +384,14 @@ void std::from_json(const json_t &js, cvector_t &vec) {
     // deduce number of qubits from length of label string
     std::string refkey = js.begin().key();
     string_trim(refkey);
-    uint_t nqubits = refkey.length();
-    uint_t nstates = 1ull << nqubits;
+    std::uint64_t nqubits = refkey.length();
+    std::uint64_t nstates = 1ull << nqubits;
     ret.resize(nstates);
     // import vector
     for (auto it = js.begin(); it != js.end(); ++it) {
       std::string key = it.key();
       string_trim(key);
-      uint_t index = std::bitset<64>(key).to_ulong();
+      std::uint64_t index = std::bitset<64>(key).to_ulong();
       std::complex<double> val = it.value().get<std::complex<double>>();
       ret[index] += val;
     }
@@ -406,9 +407,9 @@ template <typename T> void to_json(json_t &js, const matrix<T> &mat) {
   json_t ret;
   size_t rows = mat.GetRows();
   size_t cols = mat.GetColumns();
-  for (uint_t r = 0; r < rows; r++) {
+  for (std::uint64_t r = 0; r < rows; r++) {
     std::vector<T> mrow;
-    for (uint_t c = 0; c < cols; c++)
+    for (std::uint64_t c = 0; c < cols; c++)
       mrow.push_back(mat(r, c));
     ret.push_back(mrow);
   }
@@ -427,8 +428,8 @@ template <typename T> void from_json(const json_t &js, matrix<T> &mat) {
   // Convert
   if (is_matrix) {
     matrix<T> ret(rows, cols);
-    for (uint_t r = 0; r < rows; r++)
-      for (uint_t c = 0; c < cols; c++)
+    for (std::uint64_t r = 0; r < rows; r++)
+      for (std::uint64_t c = 0; c < cols; c++)
         ret(r, c) = js[r][c].get<T>();
     mat = ret;
   } else {
@@ -439,7 +440,7 @@ template <typename T> void from_json(const json_t &js, matrix<T> &mat) {
 
 // Int-key maps
 template <typename T>
-void std::to_json(json_t &js, const std::map<uint_t, T> &map) {
+void std::to_json(json_t &js, const std::map<std::uint64_t, T> &map) {
   js = json_t();
   for (const auto &p : map) {
     std::string key = std::to_string(p.first);
@@ -452,14 +453,14 @@ void to_json(json_t &js, const PauliOperator &p) {
   json_t tmp;
   tmp["X"] = p.X.getData();
   tmp["Z"] = p.Z.getData();
-  tmp["phase"] = static_cast<uint_t>(p.phase);
+  tmp["phase"] = static_cast<std::uint64_t>(p.phase);
   js = tmp;
 }
 
 void from_json(const json_t &js, PauliOperator &p) {
   if (JSON::check_keys({"pahse", "X", "Z"}, js)) {
     PauliOperator tmp;
-    std::vector<uint_t> x = js["X"], z = js["Z"];
+    std::vector<std::uint64_t> x = js["X"], z = js["Z"];
     tmp.phase = js["phase"];
     tmp.X = BinaryVector(x);
     tmp.Z = BinaryVector(z);
@@ -475,12 +476,12 @@ void to_json(json_t &js, const Clifford &clif) {
   // first n rows are destabilizers; last n rows are stabilizers
   // we don't print the auxillary row
   const auto table = clif.get_table();
-  uint_t n = (table.size() - 1) / 2;
+  std::uint64_t n = (table.size() - 1) / 2;
   assert(2 * n + 1 == table.size());
-  for (uint_t j = 0; j < n; j++) {
+  for (std::uint64_t j = 0; j < n; j++) {
     js["destabilizers"].push_back(table[j]);
   }
-  for (uint_t j = n; j < 2 * n; j++) {
+  for (std::uint64_t j = n; j < 2 * n; j++) {
     js["stabilizers"].push_back(table[j]);
   }
 }
@@ -500,7 +501,7 @@ void from_json(const json_t &js, Clifford &clif) {
   } else if (js.is_array() && js.size() % 2 == 0) {
     // Stored as 2 * nq array
     auto l = js.size();
-    uint_t nq = l / 2; // size 2 * nq array
+    std::uint64_t nq = l / 2; // size 2 * nq array
     clif = Clifford(nq);
     for (size_t j = 0; j < l; j++) {
       PauliOperator p = js[j];
@@ -591,14 +592,25 @@ std::ostream &operator<<(std::ostream &out, const std::set<T1> &s) {
 }
 
 // ostream overload for BinaryVector
-inline std::ostream &operator<<(std::ostream &out, const BinaryVector &bv) {
-  out << bv.getData();
+template<typename T>
+inline std::ostream &operator<<(std::ostream &out, const BV::BinaryVector &bv) {
+  auto data = bv.getData();
+  if (data.empty()) return out;
+  
+  out << "[" << data[0];
+  for (int i = 1; i < data.size(); ++i) out << "," << data[i];
+  out << "]";
   return out;
 }
 
 // ostream overload for QubitVector
-inline std::ostream &operator<<(std::ostream &out, const QubitVector &qv) {
-  out << qv.vector();
+inline std::ostream &operator<<(std::ostream &out, const QV::QubitVector &qv) {
+  auto data = qv.vector();
+  if (data.empty()) return out;
+  
+  out << "[" << data[0];
+  for (int i = 1; i < data.size(); ++i) out << "," << data[i];
+  out << "]";
   return out;
 }
 

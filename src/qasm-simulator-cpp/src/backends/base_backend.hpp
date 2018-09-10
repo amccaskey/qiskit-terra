@@ -86,7 +86,7 @@ public:
   * Sets the RNG seed of the backend to a fixed value.
   * @param seed: uint to use as RNG seed
   */
-  inline void set_rng_seed(uint_t seed) { rng = RngEngine(seed); };
+  inline void set_rng_seed(std::uint64_t seed) { rng = RngEngine(seed); };
 
   /**
    * Set a custom initial state for the backend to initialize qreg to before
@@ -107,7 +107,7 @@ public:
    * Returns a reference to the jth bit of the classical bit register
    * @return a reference to creg[j]
    */
-  inline uint_t &access_creg(uint_t j) { return creg[j]; };
+  inline std::uint64_t &access_creg(std::uint64_t j) { return creg[j]; };
 
   /**
    * Returns a reference to the backend RngEngine
@@ -187,9 +187,9 @@ public:
   QubitNoise noise;
 
   void attach_noise(const QubitNoise &np);
-  int_t reset_error(const uint_t state = 0);
-  int_t measure_error(uint_t n);
-  int_t relax_error();
+  std::int64_t reset_error(const std::uint64_t state = 0);
+  std::int64_t measure_error(std::uint64_t n);
+  std::int64_t relax_error();
   const GateError &gate_error(std::string gateName);
 
 protected:
@@ -368,7 +368,7 @@ void BaseBackend<StateType>::attach_noise(const QubitNoise &np) {
 }
 
 template <class StateType>
-int_t BaseBackend<StateType>::reset_error(const uint_t state) {
+std::int64_t BaseBackend<StateType>::reset_error(const std::uint64_t state) {
   if (noise_flag && noise.reset.ideal == false) {
 #ifdef DEBUG
     std::stringstream ss;
@@ -381,7 +381,7 @@ int_t BaseBackend<StateType>::reset_error(const uint_t state) {
 }
 
 template <class StateType>
-int_t BaseBackend<StateType>::measure_error(uint_t n) {
+std::int64_t BaseBackend<StateType>::measure_error(std::uint64_t n) {
   if (noise_flag && noise.readout.ideal == false &&
       n < noise.readout.p.size()) {
 #ifdef DEBUG
@@ -394,7 +394,7 @@ int_t BaseBackend<StateType>::measure_error(uint_t n) {
     return n;
 }
 
-template <class StateType> int_t BaseBackend<StateType>::relax_error() {
+template <class StateType> std::int64_t BaseBackend<StateType>::relax_error() {
   return rng.rand_int(noise.relax.populations);
 }
 

@@ -62,14 +62,14 @@ public:
    * @param b upper bound on interval
    * @return the generated integer
    */
-  int_t rand_int(int_t a, int_t b);
+  std::int64_t rand_int(std::int64_t a, std::int64_t b);
 
   /**
    * Generate a pseudo random integer from an input discrete distribution
    * @param probs the discrete distribution to sample from
    * @return the generated integer
    */
-  int_t rand_int(std::discrete_distribution<> probs);
+  std::int64_t rand_int(std::discrete_distribution<> probs);
 
   /**
    * Generate a pseudo random integer from a a discrete distribution
@@ -79,7 +79,7 @@ public:
    * @param probs the vector of probabilities
    * @return the generated integer
    */
-  int_t rand_int(std::vector<double> probs);
+  std::int64_t rand_int(std::vector<double> probs);
 
   /**
    * Default constructor initialize RNG engine with a random seed
@@ -93,7 +93,7 @@ public:
    * Seeded constructor initialize RNG engine with a fixed seed
    * @param seed integer to use as seed for mt19937 engine
    */
-  explicit RngEngine(uint_t seed) { rng.seed(seed); };
+  explicit RngEngine(std::uint64_t seed) { rng.seed(seed); };
 
 private:
   std::mt19937 rng; // Mersenne twister rng engine
@@ -116,8 +116,8 @@ double RngEngine::rand(double a, double b) {
 }
 
 // randomly distributed integers in [a,b]
-int_t RngEngine::rand_int(int_t a, int_t b) {
-  uint_t n = std::uniform_int_distribution<>(a, b)(rng);
+std::int64_t RngEngine::rand_int(std::int64_t a, std::int64_t b) {
+  std::uint64_t n = std::uniform_int_distribution<>(a, b)(rng);
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG: rand_int( " << a << "," << b << ") = " << n;
@@ -127,8 +127,8 @@ int_t RngEngine::rand_int(int_t a, int_t b) {
 }
 
 // randomly distributed integers from discrete distribution
-int_t RngEngine::rand_int(std::discrete_distribution<> probs) {
-  uint_t n = probs(rng);
+std::int64_t RngEngine::rand_int(std::discrete_distribution<> probs) {
+  std::uint64_t n = probs(rng);
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG: rand_int(" << probs.probabilities() << ") = " << n;
@@ -138,8 +138,8 @@ int_t RngEngine::rand_int(std::discrete_distribution<> probs) {
 }
 
 // randomly distributed integers from vector
-int_t RngEngine::rand_int(std::vector<double> probs) {
-  uint_t n = std::discrete_distribution<>(probs.begin(), probs.end())(rng);
+std::int64_t RngEngine::rand_int(std::vector<double> probs) {
+  std::uint64_t n = std::discrete_distribution<>(probs.begin(), probs.end())(rng);
 #ifdef DEBUG
   std::stringstream ss;
   ss << "DEBUG: rand_int(" << probs << ") = " << n;
